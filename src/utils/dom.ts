@@ -25,6 +25,7 @@ export function getImgStatus(imgPath: string) {
     try {
       const image = new Image()
       image.src = imgPath
+      image.referrerPolicy = "no-referrer"
       image.onload = resolve
       image.onerror = reject
     } catch (err) {

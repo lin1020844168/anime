@@ -24,13 +24,21 @@ export const usePlayCacheStore = defineStore('playCache', {
   },
   actions: {
     clearHistory() {
-      getPlayHistoryInstance().clearStore()
+      getPlayHistoryInstance().clearHistory()
     },
     saveHistory() {
       getPlayHistoryInstance().saveStore()
     },
     removeHistoryById(id: number) {
       getPlayHistoryInstance().remove(id)
+    },
+    clearStore() {
+      getPlayHistoryInstance().clearStore()
+      getPlayProgressInstance().clearStore()
+    },
+    async getStore() {
+      await getPlayHistoryInstance().getStore()
+      await getPlayProgressInstance().getStore()
     }
   }
 })

@@ -69,7 +69,7 @@
           />
         </div>
       </div>
-      <!-- <div
+      <div
         v-if="quality.length > 0"
         v-click-outside="() => (qualitySelectVisible = false)"
         class="control-select quality"
@@ -82,12 +82,12 @@
             v-for="{ name, value } in quality"
             :key="value"
             :class="{ active: currentQuality === value }"
-            @click="changeQuality(value)"
+            @click="changeQuality({name, value})"
           >
             {{ name }}
           </li>
         </ul>
-      </div> -->
+      </div>
       <div class="control-select" @click="skipOp">
         <span>跳过OP</span>
       </div>
@@ -218,7 +218,7 @@ import {
   throttle,
   timeToS
 } from '@sorarain/utils'
-import { computed, reactive, ref, shallowReactive, watch } from 'vue'
+import { computed, reactive, ref, shallowReactive, watch,onUpdated } from 'vue'
 
 import AwVideoMask from './AwVideoMask.vue'
 import AwVideoMsg, { NotifyItem } from './AwVideoMsg.vue'
@@ -228,14 +228,16 @@ import VideoRender from './VideoRender.vue'
 
 import { getVideoScreenshot } from '@/utils/media'
 import { useEventListener } from '@sorarain/use'
+import { QUALITY_CONST } from './type'
 import * as Type from './type'
+import { update } from 'lodash'
 
 // type Props = ExtractPropTypes<typeof props>
 
 const props = withDefaults(
   defineProps<{
     /** 画质列表 */
-    // quality?: Type.Quality[]
+    quality?: Type.Quality[]
     /** 视频源地址 */
     src: string
     /** 初始化时是否静音 */
@@ -253,23 +255,14 @@ const props = withDefaults(
     /** 集数列表 */
     episodes?: Type.Episode[]
     /** 当前播放集 */
-    currentEpisode?: string
+    currentEpisode?: string,
+    /**初始画质 */
+    initQuality: number|string
   }>(),
   {
-    // quality: () => [
-    //   {
-    //     name: '1080p 超清',
-    //     value: 0
-    //   },
-    //   {
-    //     name: '720p 高清',
-    //     value: 1
-    //   },
-    //   {
-    //     name: '自动',
-    //     value: -1
-    //   }
-    // ]
+    quality: () => [
+      
+    ],
     muted: false,
     initCurrentTime: 0,
     requesting: false,
@@ -279,7 +272,7 @@ const props = withDefaults(
   }
 )
 const emit = defineEmits<{
-  (e: 'changeQuality'): void
+  (e: 'changeQuality',v:Type.Quality): void
   (e: 'ended'): void
   (e: 'error'): void
   (e: 'next'): void
@@ -465,38 +458,41 @@ const { episode } = (() => {
     episode
   }
 })()
-// /** 画质切换模块 */
-// const qualityModule =
-//   (() => {
-//     /** 当前画质 */
-//     const currentQuality = ref<Type.Quality['value']>(-1)
-//     /** 画质选项选项显隐 */
-//     const qualitySelectVisible = ref(false)
-//     /** 当前选择的画质名称 */
-//     const currentQualityName = computed(
-//       () =>
-//         props.quality.find((item) => item.value === currentQuality.value)
-//           ?.name || '-'
-//     )
 
-//     /**
-//      * 画质切换
-//      * @param value 画质值
-//      */
-//     const changeQuality = (value: Type.Quality['value']) => {
-//       currentQuality.value = value
-//       qualitySelectVisible.value = false
-//       emit('changeQuality', value)
-//     }
+/** 画质切换模块 */
+const {currentQuality, currentQualityName, changeQuality, qualitySelectVisible} =
+  (() => {
+    /** 当前画质 */
+    // const currentQuality = ref<Type.Quality['value']>(props.initQuality);
+    const currentQuality = computed(()=>props.initQuality)
+      // const currentQuality =props.initQuality;
+    /** 画质选项选项显隐 */
+    const qualitySelectVisible = ref(false)
+    /** 当前选择的画质名称 */
+    const currentQualityName = computed(
+      () =>
+        props.quality.find((item) => item.value === currentQuality.value)
+          ?.name || '-'
+    )
 
-//     return {
-//       currentQuality,
-//       currentQualityName,
-//       changeQuality,
-//       qualitySelectVisible
-//     }
-//   })()
+    /**
+     * 画质切换
+     * @param value 画质值
+     */
+    const changeQuality = (quality: Type.Quality) => {
+      qualitySelectVisible.value = false;
+      // localStorage.getItem("quality");
+      emit('changeQuality', quality);
+    }
 
+    return {
+      currentQuality,
+      currentQualityName,
+      changeQuality,
+      qualitySelectVisible
+    }
+  })();
+  
 /**
  * 计算进度预览图
  * @param val ms

@@ -16,6 +16,18 @@ export enum PlayerStatus {
   Paused = 2
 }
 
+/**视频画质 */
+export enum QualityState {
+  q_360p = 1<<4,
+  q_480p = 1<<5, 
+  q_720p = 1<<6,
+  q_1080p = 80,
+  q_1080pp = 112,
+  q_4k = 120,
+}
+
+export const QUALITY_CONST = "QUALITY_CONST";
+
 /** 播放器信息 */
 export interface Player {
   /** 当前进度 */
@@ -52,5 +64,7 @@ export interface Quality {
 
 export interface Episode {
   name: string
-  value: string
+  value: string, 
+  episodeId: number|string
 }
+

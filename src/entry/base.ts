@@ -6,21 +6,26 @@ import { createPlayProgress } from '@/class/playProgress.class'
 import { createPreloadCdn } from '@/plugins/preloadCdn.class'
 import { createTheme } from '@/theme/theme.class'
 import { createPinia } from 'pinia'
+import { createUser } from '@/class/user.class'
+import { useUserStore } from '@/stores/user.store'
 
-export function baseLoader(app: App<Element>) {
-  const pinia = createPinia()
-
-  app.config.globalProperties.$moment = moment
-
+export async function baseLoader(app: App<Element>) {
+  const pinia = createPinia() 
+  app.use(pinia)
+  createPlayProgress()
+  createPlayHistory()
+  createComicFav()
+  createUser()
+  await useUserStore().init()
   createPreloadCdn()
   createTheme()
-  createPlayProgress().getStore()
-  createPlayHistory().getStore()
-  createComicFav().getStore()
-
-  app.use(pinia)
-
+  app.config.globalProperties.$moment = moment
+  
   window.addEventListener('unhandledrejection', (e) => {
     e.preventDefault()
   })
 }
+function userUserStore() {
+  throw new Error('Function not implemented.')
+}
+

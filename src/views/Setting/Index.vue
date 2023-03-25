@@ -89,6 +89,7 @@ function themeColorModule() {
     getThemeInstance()?.saveLocalColor(theme)
     ElNotification({
       title: '主题配置',
+      customClass: 'app-notify',
       message: '主题保存成功',
       type: 'success'
     })
@@ -176,6 +177,7 @@ function configModule() {
         await staticResourceFormComp.value!.validate()
         systemConfigStore.saveStaticResource(configVal.staticResource)
         ElNotification({
+          customClass: 'app-notify',
           title: '资源配置',
           message: '保存成功',
           type: 'success'

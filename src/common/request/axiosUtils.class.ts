@@ -35,8 +35,10 @@ export default class AxiosUtils {
         ) {
           // store.dispatch('logout')
           ElNotification({
+            
             type: 'error',
             title: '资源获取错误',
+            customClass: 'app-notify',
             message: '请求源存在问题，请检查或修改 服务器地址'
           })
           router.push({ name: 'Setting' })

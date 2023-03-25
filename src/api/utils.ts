@@ -13,11 +13,60 @@ export function videoUrlFormat(url: string) {
 
 export const newError = () => new Error('bad request')
 
+export const successNotification = (title:string, message:string) => {
+  return ElNotification({
+    type: 'success',
+    title: title,
+    customClass: 'app-notify',
+    message: message,
+    duration: 0
+  })
+}
+
+export const errorNotification =(title:string, message:string) => {
+  return ElNotification({
+    type: 'error',
+    title: title,
+    customClass: 'app-notify',
+    message: message,
+    duration: 0
+  })
+}
+
 export const badRequestNotify = (apiPath: string) => {
   return ElNotification({
     type: 'error',
     title: '资源获取',
+    customClass: 'app-notify',
     message: `${apiPath} 资源获取出问题啦！`,
+    duration: 0
+  })
+}
+
+export const loginSuccess = () => {
+  return ElNotification({
+    type: 'success',
+    title: '登录成功',
+    customClass: 'app-notify',
+    duration: 0
+  })
+} 
+
+export const logoutSuccess = () => {
+  return ElNotification({
+    type: 'success',
+    title: '退出成功',
+    customClass: 'app-notify',
+    duration: 0
+  })
+} 
+
+export const loginNotify = (msg: string) => {
+  return ElNotification({
+    type: 'warning',
+    title: '登录状态',
+    message: msg,
+    customClass: 'app-notify',
     duration: 0
   })
 }

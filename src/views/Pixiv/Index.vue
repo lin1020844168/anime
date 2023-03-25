@@ -14,8 +14,9 @@
               PIXIV_SEARCH_SORT.find((item) => item.value === pixivFilter.sort)
                 ?.name
             }}
-            <Icon name="arrow" />
+            <Icon name="arrow" />          
           </div>
+          
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item

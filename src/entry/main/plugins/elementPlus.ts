@@ -7,11 +7,12 @@ import {
   ElOption,
   ElNotification,
   ElSlider,
-  ElTooltip
+  ElTooltip, 
+  ElMessage
 } from 'element-plus'
 const comps = [ElTabs, ElTabPane, ElSelect, ElOption, ElSlider, ElTooltip]
 
-const plugins = [ElNotification]
+const plugins = [ElNotification, ElMessage]
 export const elementPlusInit: Plugin = {
   install(app) {
     comps.forEach((comp) => {

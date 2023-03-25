@@ -3,10 +3,12 @@
     <SearchHeader
       v-model="filter.name"
       :history="searchHistoryList"
+      :items="items"
       @search="searchByName"
       @clear="resetName"
       @deleteHistory="deleteHistory"
       @clearHistory="clearHistory"
+      @update:modelValue="updateModelValue"
     >
       <Icon
         class="filter-icon"
@@ -14,14 +16,31 @@
         :class="{ active: filterVisible }"
         @click="filterVisible = !filterVisible"
       />
-    </SearchHeader>
+    </SearchHeader> 
 
-    <transition enter-active-class="fade-in">
+    <transition class="animate__animated animate__faster" enter-active-class="animate__slideInDown" leave-active-class="animate__slideOutUp">
       <article
-        v-show="filterVisible && !filterConfig.pending"
+        @mousewheel="filterVisible=false"
+        v-show="filterVisible && !categoryconfig.pending"
         class="search-filter"
       >
-        <AwRadio
+      <AwRadio
+        v-model="categoryconfig.partition.value"
+        label="分区"
+        :options="categoryconfig.org"
+        :right-cancle="false"
+        />
+        <div v-for="(item,index) in categoryconfig?.org[categoryconfig.partition.cur]?.children">
+          <AwRadio 
+            v-model="categoryconfig.selectOther[index].value"
+            :label="item.name" 
+            :options="item.children" 
+            :right-cancle="false"
+            @click="searchByFilter"
+            />
+        </div> 
+        
+        <!-- <AwRadio
           v-model="filter.cate"
           label="分类"
           :options="filterConfig.cate"
@@ -54,7 +73,7 @@
           :options="SEARCH_FILTER.LETTER"
           :right-cancle="false"
           @change="searchByFilter(true)"
-        />
+        /> -->
       </article>
     </transition>
     <main ref="searchMainEl" class="search-main">
@@ -110,20 +129,26 @@ import * as Api from '@/api'
 import { useLongtimePendingRef, usePageOut } from '@/hooks/utils'
 import { useSearchHistory } from '@/stores/searchHistory.store'
 import { SEARCH_FILTER } from './statics/form'
+import { filter, size } from 'lodash'
+import { complement, SelectOther, SelectPartition as SelectPartition } from '@/api'
+import { watch } from 'fs'
 
 /**
  * 筛选模组
  * @param init 筛选模组就绪回调
  */
 function filterModule(init: () => void) {
+  const categoryconfig = reactive({
+    org: [] as Api.GetCategoryConfigReturn, 
+    selectOther: [] as SelectOther, 
+    partition: {} as SelectPartition,
+    pending: false
+  })
+
   /** 筛选信息 */
   const filter = reactive({
     name: '',
-    cate: -1,
-    type: '',
-    order: 'time',
-    letter: '',
-    year: 0
+    cate: -1
   })
   /** 筛选参数 */
   const filterConfig = shallowReactive({
@@ -145,7 +170,7 @@ function filterModule(init: () => void) {
     size: 24,
     total: 0
   })
-  const filterVisible = ref(true)
+  const filterVisible = ref(false)
 
   const resetPager = () => {
     pager.currnet = 1
@@ -165,16 +190,28 @@ function filterModule(init: () => void) {
   }
 
   ;(async () => {
-    filterConfig.org = await Api.getComicFilterConfig()
-    if (filterConfig.org.length > 0) {
-      filter.cate = filterConfig.org[0].id
-      filter.type = getVal(() => filterConfig.org[0].value[0].value, '')
+    // filterConfig.org = await Api.getComicFilterConfig()
+    // if (filterConfig.org.length > 0) {
+    //   filter.cate = filterConfig.org[0].id
+    //   filter.type = getVal(() => filterConfig.org[0].value[0].value, '')
+    // }
+    // filterConfig.pending = false
+    const data = await Api.getCategoryConfig()
+    categoryconfig.org = data
+    categoryconfig.partition = {
+      cur: 0, 
+      value: data[0].value
     }
-    filterConfig.pending = false
+    categoryconfig.selectOther = data[0].children.map((item, index)=>({
+      cur: index,
+      value: item.children[0].value,
+      selectValue: item.value
+    }))
     init()
   })()
 
   return {
+    categoryconfig,
     filter,
     filterConfig,
     pager,
@@ -221,6 +258,7 @@ export default defineComponent({
       initPending: true
     })
     const {
+      categoryconfig,
       filter,
       pager,
       filterVisible,
@@ -230,7 +268,6 @@ export default defineComponent({
     } = filterModule(() => {
       searchByFilter()
     })
-
     const hasSearchKey = computed(() => filter.name !== '')
 
     const setSearchResult = (data: Api.ComicPageList[]) => {
@@ -239,6 +276,23 @@ export default defineComponent({
       }
       searchResult.value = data
     }
+
+    
+    let timer: NodeJS.Timeout;
+    const items = ref<string[]>([])
+    const updateModelValue = (v: string) => {
+      clearTimeout(timer)
+      timer = setTimeout(async () => {
+        if (v === "") {
+          items.value = []
+        } else {
+          items.value = await complement(v)
+        }
+
+      }, 500)
+    }
+
+
     /**
      * 根据名称搜索
      * @param clear 是否清空历史
@@ -251,11 +305,12 @@ export default defineComponent({
       searchMainEl.value!.scrollTop = 0
       clear && resetFilter()
       searchHistory.add(filter.name)
-      const { data, total } = await Api.searchComic({
+      const { data, total, size } = await Api.searchComic({
         name: filter.name,
-        page: pager.currnet - 1
+        page: pager.currnet 
       })
       pager.total = total
+      pager.size = size
       setSearchResult(data)
       isSearchFetching.value = false
     }
@@ -268,15 +323,13 @@ export default defineComponent({
       isEmptySearch.value = false
       searchMainEl.value!.scrollTop = 0
       clear && resetName()
-      const { data, total } = await Api.filterComic({
+      const { data, total, size } = await Api.filterComic({
         page: pager.currnet,
-        type: filter.cate,
-        category: filter.type,
-        order: filter.order,
-        year: filter.year,
-        letter: filter.letter
+        selectOther: categoryconfig.selectOther,
+        partition: categoryconfig.partition.value
       })
       pager.total = total
+      pager.size = size
       setSearchResult(data)
       isSearchFetching.value = false
     }
@@ -290,6 +343,9 @@ export default defineComponent({
     // })
 
     return {
+      items,
+      updateModelValue,
+      categoryconfig,
       searchMainEl,
       filter,
       pager,

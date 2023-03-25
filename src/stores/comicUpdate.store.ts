@@ -57,6 +57,7 @@ export const useComicUpdate = defineStore('comicUpdate', {
             const notify = ElNotification({
               message: `<strong style="font-size: 20px;color: var(--font-color)">${comic.comicName}</strong> <br/> 你的订阅更新辣，点击前往！`,
               duration: 10000,
+              customClass: 'app-notify',
               dangerouslyUseHTMLString: true,
               onClick() {
                 toComicMain(comic.comicId, undefined, {

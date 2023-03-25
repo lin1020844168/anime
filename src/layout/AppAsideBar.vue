@@ -51,7 +51,13 @@ export default defineComponent({
         routeName: 'Setting',
         routePath: 'setting',
         icon: 'setting1'
-      }
+      },
+      {
+        name: '聊天',
+        routeName: 'Chat',
+        routePath: 'chat',
+        icon: '13'
+      },
     ]
     const sliderStyle = computed(() => {
       const routeIndex = routeList.findIndex((item) =>

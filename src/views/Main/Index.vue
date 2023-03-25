@@ -15,6 +15,9 @@
           :btn-icon="systemConfigStore.staticResource.videoProgressCurIcon"
           :current-episode="anthology.current"
           :episodes="anthologyCurrentList"
+          :quality="anthology.list[0]?.qualities"
+          :initQuality="initQuality"
+          @changeQuality="changeQuality"
           @next="nextAnthology"
           @ended="nextAnthology"
           @error="onVideoError"
@@ -31,7 +34,7 @@
                 :key="index"
                 :bad-anthology="anthology.bads"
                 :org-id="item.orgId"
-                :active="anthology.current"
+                :active="anthology.currentItem?.value"
                 :label="item.name"
                 :list="item.values"
                 @change="onCurrentAnthologyChange"
@@ -78,6 +81,12 @@ import { autoObjAssign } from '@/utils/adLoadsh'
 import * as Api from '@apis/index'
 import { GetComicMainReturn } from '@apis/index'
 import * as Type from './types/index.type'
+import {QualityState} from '../../components/AwVideo/type'
+import { QUALITY_CONST } from '../../components/AwVideo/Type'
+import { values } from 'lodash'
+import * as VideoApi from '../../components/AwVideo/Type';
+import { def } from '@vue/shared'
+import * as UserApi from '@/api/user'
 
 /**
  * 动漫信息模块
@@ -102,16 +111,22 @@ function comicInfoModule(comicId: Ref<ComicId>, init: () => void) {
   })
   /** 动漫地址集 */
   const comicUrls = ref<Api.GetVideoUrlReturn>([])
+  const episodeOrgs = ref<Api.GetEpisodeOrgReturn>([]);
+  // const quality = ref<Api.GetQualityReturn>([])
   const comicImglist = ref<Api.ComicSearchItem[]>([])
 
+  /** 初始化 */
   const comicInit = async (comicId: ComicId) => {
     isPending.value = true
-    const [urls, main] = await Promise.all([
-      Api.getVideoUrl(comicId),
+    const [orgs, main] = await Promise.all([
+      Api.getEpisodeOrg(comicId),
+      // Api.getVideoUrl(comicId),
       Api.getComicMain(comicId)
     ])
 
-    comicUrls.value = urls
+
+    // comicUrls.value = urls
+    episodeOrgs.value = orgs
     if (main) {
       comic.playlist = main.playlist
       autoObjAssign(comic, main)
@@ -132,6 +147,7 @@ function comicInfoModule(comicId: Ref<ComicId>, init: () => void) {
   })
 
   return {
+    episodeOrgs,
     comic,
     comicUrls,
     isPending,
@@ -164,6 +180,7 @@ export default defineComponent({
     const systemConfigStore = useSystemConfigStore()
     const koharu = useKoharu()
 
+
     const routeParam = computed(() => ({
       episode: Number(route.query?.episode) || -1,
       progress: Number(route.query?.progress) || -1,
@@ -171,7 +188,37 @@ export default defineComponent({
       latest: !!Number(route.query?.latest)
     }))
 
-    const { comic, comicUrls, ...comicInfoModuleArgs } = comicInfoModule(
+    /* 
+    ===============================================================================================================
+    */
+    const defaultQuality:number|string = QualityState.q_480p;
+    const initQuality = ref<number|string>(defaultQuality) 
+    
+    /**
+     * 
+     * @param value 改变画质
+     */
+    const changeQuality = (quality: VideoApi.Quality)=>{
+      localStorage.setItem(QUALITY_CONST, quality.value+"")
+      anthology.current = anthology.currentItem?.value+(quality.value+"")
+      const progress = getVal(() => awVideoComp.value!.player.currentTime, 0)
+      initQuality.value = quality.value
+      initPlayerCurrentTime.value = progress
+      awVideoComp.value!.clearNotify()
+        awVideoComp.value!.notify({
+          content: `切换到${quality.name}`,
+          duration: 3000
+        })
+    }
+
+  
+
+    /**
+     * =============================================================================================================
+     */
+
+
+    const { comic, episodeOrgs, comicUrls, ...comicInfoModuleArgs } = comicInfoModule(
       toRef(props, 'id'),
       () => {
         if (routeParam.value.latest) {
@@ -193,17 +240,35 @@ export default defineComponent({
       currentItem: null,
       bads: [],
       get list() {
-        return comicUrls.value.map((item) => {
-          const playlist = comic.playlist.get(item.key)
-          return {
-            name: `播放源(${item.key})`,
-            orgId: item.key,
-            values: item.value.map((url, index) => ({
-              name: playlist?.[index]?.name || '未知',
-              value: url
-            }))
-          }
-        })
+        // return comicUrls.value.map((item) => {
+        //   // const playlist = comic.playlist.get(item.key)
+        //   // console.log("playlist"+playlist)
+        //   return {
+        //     name: `播放源(${item.key})`,
+        //     orgId: item.key,
+        //     // values: item.value.map((url, index) => ({
+        //     //   name: playlist?.[index]?.name || '未知',
+        //     //   value: url
+        //     // }))
+        //     values: getVal(()=>item.playlist, []).map((e)=>({
+        //       name: e.title,
+        //       value: e.link
+        //     }))
+        //   }
+        // })
+        return episodeOrgs.value.map((i1)=>({
+          name: `播放源(${i1.key})`,
+          orgId: i1.key,
+          values: i1.episodes.map((i2)=>({
+            name: i2.title+"" || '未知',
+            value: `${i1.src}/${i2.id}/`, 
+            episodeId: i2.id
+          })), 
+          qualities: i1.qualities.map((i3)=> ({
+            name: i3.desc, 
+            value: i3.value
+          })),
+        }))
       }
     })
     /** 播放器初始化进度 */
@@ -238,28 +303,38 @@ export default defineComponent({
       { isAddCache = true, resetInitPlayerCurrentTime = false } = {}
     ) => {
       const { value } = item
-      resetInitPlayerCurrentTime && (initPlayerCurrentTime.value = 0)
-
+      isAddCache && saveProgressCache(anthology.currentItem)
       // 错误地址判断
       if (['kol-fans.fp.ps', 'iqiyi'].some((key) => value.includes(key))) {
         anthology.bads.push(value)
         return false
       } else {
-        anthology.current = value
+        anthology.current = value+ (localStorage.getItem(QUALITY_CONST)||defaultQuality)
         anthology.currentItem = item
-        isAddCache && saveProgressCache(item)
         awVideoComp.value!.clearNotify()
         awVideoComp.value!.notify({
-          content: `正在播放${item.name}`,
+          content: `正在播放第${item.name}集`,
           duration: 3000
         })
+        // const cache = playProgressCache.getLatestCache(+props.id)
+        const cache = playProgressCache.getCacheByItem(props.id,item.orgId,item.name)
+        initPlayerCurrentTime.value = cache?.progress||0
+        resetInitPlayerCurrentTime && (initPlayerCurrentTime.value = 0)
+        if (cache) {
+          awVideoComp.value?.notify({
+            content: `已为您定位到${sToMs(cache.progress)}`,
+            duration: 3000
+          })
+        }
         return true
       }
     }
     /** 下一集 */
     const nextAnthology = () => {
       if (!anthology.currentItem) return
+      awVideoComp.value!.player.currentTime = 0
       initPlayerCurrentTime.value = 0
+      saveProgressCache(anthology.currentItem)
       const list = anthologyListMap.value[anthology.currentItem.orgId]
       if (!list) return
       const nextIndex =
@@ -289,7 +364,8 @@ export default defineComponent({
         orgId: item.orgId,
         name: String(item.name),
         progress: getVal(() => awVideoComp.value!.player.currentTime, 0),
-        comicId: +props.id
+        comicId: +props.id, 
+        episodeId: item.episodeId
       })
     }
     /**
@@ -318,6 +394,10 @@ export default defineComponent({
         const value = list.values.find((item) => item.name === cache.name)
         if (!value) return
         initPlayerCurrentTime.value = cache.progress
+        const localQuality = anthology.list.find((item)=>item.orgId===cache.orgId)
+          ?.qualities.find((item)=>item.value==localStorage.getItem(QUALITY_CONST))?.value
+        
+        initQuality.value = localQuality||defaultQuality
         changeAnthology(
           {
             ...value,
@@ -327,10 +407,10 @@ export default defineComponent({
             isAddCache: false
           }
         )
-        awVideoComp.value?.notify({
-          content: `上次播放到 ${value.name} ${sToMs(cache.progress)}`,
-          duration: 3000
-        })
+        // awVideoComp.value?.notify({
+        //   content: `上次播放到 ${value.name} ${sToMs(cache.progress)}`,
+        //   duration: 3000
+        // })
       } else {
         // 默认选择第一个源下的第一集
         const item = getVal(() => anthology.list[0].values[0], null)
@@ -347,6 +427,7 @@ export default defineComponent({
           ElNotification({
             type: 'error',
             title: '动漫加载',
+            customClass: 'app-notify',
             message: '默认加载失败，请手动选择源'
           })
       }
@@ -406,7 +487,7 @@ export default defineComponent({
       })
     }
     const onCurrentAnthologyChange = <
-      T extends { name: string; value: string }
+      T extends { name: string; value: string, episodeId: number|string }
     >(
       e: T
     ) => {
@@ -416,7 +497,7 @@ export default defineComponent({
           ...e
         },
         {
-          resetInitPlayerCurrentTime: true
+          resetInitPlayerCurrentTime: false
         }
       )
     }
@@ -438,12 +519,14 @@ export default defineComponent({
       initPlayerCurrentTime,
       systemConfigStore,
       anthologyCurrentList,
+      initQuality,
       onFullscreen,
       changeAnthology,
       onCurrentAnthologyChange,
       onVideoError,
       nextAnthology,
-      saveStores
+      saveStores,
+      changeQuality
     }
   }
 })

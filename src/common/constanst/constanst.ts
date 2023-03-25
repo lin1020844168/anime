@@ -1,0 +1,10 @@
+export const TOKEN = "anime_token"
+export const WEBSOCKET_URL = "ws://127.0.0.1/ws/"
+export const RETURN = 0
+export const TEXT = 1;
+export const NOTIFICATION = 2;
+export const SINGLE = 1;
+export const BROADCAST = 2;
+export const NOOPERATION = 0;
+export const AGREE = 1;
+export const REJECT = 2;

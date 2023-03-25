@@ -1,6 +1,9 @@
+import { getax } from '@/common/request'
 import { jsonParse, arrChildSwap } from '@sorarain/utils'
 import { ref } from 'vue'
 import { StorageWatcherCling } from './storageWatcher.class'
+import * as Api from '@/api/user'
+import { getUserInstance } from './user.class'
 
 const COMIC_FAV_STORE_KEY = 'COMIC_FAV_STORE'
 
@@ -44,31 +47,56 @@ class ComicFav extends StorageWatcherCling {
     return this.fav_.value.findIndex((item) => item.comicId === comicId)
   }
 
-  public favHandler(comic: Comic) {
+  public async favHandler(comic: Comic) {
     const removeIndex = this.index(comic.comicId)
-
+    const user = getUserInstance()
     if (!!~removeIndex) {
-      this.fav_.value.splice(removeIndex, 1)
+      if (!user.getIsLogin()) return
+      
+      const userId = user.getUserId()
+      const token = user.getToken()
+      const isSuccess = await Api.delFav(userId, comic.comicId, token)
+      if (isSuccess) {
+        this.fav_.value.splice(removeIndex, 1)
+      }
+      
     } else {
-      this.fav_.value.unshift({
-        ...comic,
-        favDate: this.getTime()
-      })
+      if (!user.getIsLogin()) return
+      const userId = user.getUserId()
+      const token = user.getToken()
+      const isSuccess = await Api.addFav(userId, comic.comicId, token)
+      if (isSuccess) {
+        this.fav_.value.unshift({
+          ...comic,
+          favDate: this.getTime()
+        })
+      }
+
     }
   }
 
   public saveStore() {
-    localStorage.setItem(COMIC_FAV_STORE_KEY, JSON.stringify(this.fav_.value))
+    // localStorage.setItem(COMIC_FAV_STORE_KEY, JSON.stringify(this.fav_.value))
   }
 
-  public getStore() {
-    const data = jsonParse<ComicFavItem[]>(
-      localStorage.getItem(COMIC_FAV_STORE_KEY),
-      []
-    )
+  public async getStore() {
+    // const data = jsonParse<ComicFavItem[]>(
+    //   localStorage.getItem(COMIC_FAV_STORE_KEY),
+    //   []
+    // )
+    const user = getUserInstance()
+    if (!user.getIsLogin()) return
+      
+      const userId = user.getUserId()
+      const token = user.getToken()
+    const data = await Api.getFav(userId, token)
     if (data instanceof Array) {
       this.fav_.value = data
     }
+  }
+
+  public clearStore() {
+    this.fav_.value = []
   }
 
   public exChange(aIndex: number, bIndex: number) {

@@ -1,4 +1,9 @@
+import { ComicFavItem } from '@/class/comicFav.class'
 import * as ApiType from './api.type'
+import {CacheItem as HistoryCacheItem}  from '@/class/playHistory.class'
+import {CacheItem as ProgressCacheItem } from '@/class/playProgress.class'
+import { Category } from './api.type'
+import exp from 'constants'
 
 /**
  * 分页
@@ -8,6 +13,9 @@ type Page<T> = {
   data: T
   /** 总数 */
   total: number
+
+  /** 当前页条数 */
+  size: number
 }
 
 /**
@@ -123,7 +131,13 @@ export type GetVideoUrlReturn = {
   /** 源id */
   key: string
   /** 源-播放地址列表 */
-  value: string[]
+  // value: string[]
+  playlist: {
+    //连接地址
+    link: string,
+    //标题
+    title: string
+  }[]
 }[]
 
 /**
@@ -189,3 +203,93 @@ export interface VilipixerInfo {
   name: string
   desc: string
 }
+
+/**==================================================================================================== */
+//返回视频url关键信息集合
+export type GetEpisodeOrgReturn = {
+  //源信息
+  key: string,
+  //源路径
+  src: string,
+  //画质列表
+  qualities: {
+    //画质值
+    value: number,
+    //画质描述
+    desc: string,
+  }[],
+  //分集xinxi
+  episodes: {
+    //分集id
+    id: string,
+    //分集位置
+    title: string|number, 
+    //分集标题
+    longTitle: string
+  }[]
+}[]
+
+export type GetFavReturn = ComicFavItem[]
+
+export type AddFavReturn = boolean
+
+export type DelFavReturn = boolean
+
+export type AddHistoryReturn = boolean
+
+export type GetHistoryReturn = HistoryCacheItem[]
+
+export type DelHistoryReturn = boolean
+
+export type ClearHistoryReturn  = boolean
+
+export type AddEpisodeProgressReturn = boolean
+
+export type GetEpisodeProgressReturn = ProgressCacheItem[]
+
+export type GetCategoryConfigReturn = Category[]
+
+export type GetComplementReturn = string[]
+
+export type LoginReturn = UserInfo
+
+export interface SelectPartition {
+  cur: number, 
+  value: string
+}
+
+export type SelectOther = {
+  cur: number,
+  value: string, 
+  selectValue: string
+}[]
+
+export type UserInfo = {
+  username: string,
+  img: string, 
+  userId: string, 
+  token: string
+}
+
+
+export type Register = {
+  phone:string, password:string, name: string, code:string
+}
+
+export type FriendInfo = {
+  userId:string,
+  name:string,
+  img:string
+}
+
+export type newFriend = FriendInfo&{
+  messageId: string|null, 
+  loading: boolean
+}
+ 
+
+export type ApplyHistoryList = ApplyHistory[]
+
+export type FriendList = FriendInfo[]
+
+/**==================================================================================================== */

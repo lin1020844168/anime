@@ -104,7 +104,7 @@ export default defineComponent({
           title: item.name,
           avatar: item.cover,
           desc: item.playEpisode
-            ? `${item.playEpisode} ${item.playProgress}`
+            ? `观看至 [${item.playEpisode}] ${item.playProgress}`
             : '播放失败',
           tags: [
             {

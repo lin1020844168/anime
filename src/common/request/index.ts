@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios, { AxiosRequestConfig } from 'axios'
 import { BASE_COMIC_URL, timeout } from './config'
 import AxiosUtils from './axiosUtils.class'
 
@@ -14,10 +14,11 @@ new AxiosUtils(instance)
  * @param url 请求地址
  * @returns
  */
-export function getax<T>(url: string) {
+export function getax<T>(url: string, config?: AxiosRequestConfig) {
   // onDownloadProgress ???
-  return instance.get<T>(url)
+  return instance.get<T>(url, config)
 }
+
 
 /**
  * 请求 - post

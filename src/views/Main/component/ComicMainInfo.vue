@@ -66,7 +66,7 @@ export default defineComponent({
         : [
             {
               label: '评分',
-              value: comic.rank
+              value: comic.rank||'未知'
             },
             {
               label: '首播时间',

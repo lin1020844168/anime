@@ -50,6 +50,7 @@ export function copyText(text: string | number) {
   ElNotification({
     title: '内容复制',
     message: '内容已经成功复制到粘贴板~',
+    customClass: 'app-notify',
     type: 'success'
   })
 }

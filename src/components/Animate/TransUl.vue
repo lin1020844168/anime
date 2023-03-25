@@ -10,7 +10,6 @@
     <slot v-if="!isActive" />
   </transition-group>
 </template>
-
 <script lang="ts">
 import { useDomObserver } from '@/hooks/utils'
 import { defineComponent, ref } from 'vue'

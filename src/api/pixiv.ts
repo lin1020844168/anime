@@ -3,9 +3,10 @@ import * as FnReturns from './type'
 import * as ApiReturns from './api.type'
 import { getVal } from '@sorarain/utils'
 import { vilipixSearchResultFormat, vilipixImgPathFormat } from './utils'
+import { debug } from 'console'
 
 // const BaseUrl = 'http://localhost:3001'
-const BaseUrl = 'http://pixivapi.adicw.cn'
+const BaseUrl = 'http://localhost:30000'
 
 /**
  * 获取动漫的相关图片列表-来源pixiv
@@ -125,6 +126,7 @@ export async function getVilipixHotTags() {
     const { data = [] } = await dfGetax<string[]>(`${BaseUrl}/hot-tags`)
     return data.slice(0, 10)
   } catch {
+    
     return []
   }
 }

@@ -1,20 +1,25 @@
 import { jsonParse } from '@sorarain/utils'
 import { ref } from 'vue'
 import { StorageWatcherCling } from './storageWatcher.class'
+import * as UserApi from '@/api/user'
+import { getUserInstance } from './user.class';
 
 interface BaseCacheItem {
   /** 动漫id */
-  comicId: number
+  comicId: number|string
   /** 播放源id */
   orgId: string
   /** 播放级数 */
   name: string
   /** 播放进度 */
   progress: number
+  /** 分集id */
+  episodeId: number|string
 }
-type CacheItem = BaseCacheItem & {
+export type CacheItem = BaseCacheItem & {
   /** 创建时间 */
   date: number
+  
 }
 
 const PLAY_PROGRESS_STORE_KEY = 'PLAY_PROGRESS_STORE'
@@ -36,6 +41,10 @@ class PlayProgress extends StorageWatcherCling {
       },
       {}
     )
+  }
+
+  private checkUserLogin() {
+    return getUserInstance().getIsLogin();
   }
 
   private get latestCacheMap() {
@@ -60,6 +69,7 @@ class PlayProgress extends StorageWatcherCling {
     return `${item.comicId}-${item.orgId}-${item.name}`
   }
 
+
   /**
    * 判断是否存在此集
    * @param name
@@ -74,6 +84,9 @@ class PlayProgress extends StorageWatcherCling {
    * @param item
    */
   public add(item: BaseCacheItem) {
+    if (!this.checkUserLogin()) {
+      return;
+    }
     if (!item.orgId) return
     const name = this.cacheItemToName(item)
     const cacheItem = {
@@ -88,6 +101,10 @@ class PlayProgress extends StorageWatcherCling {
       )
       this.cache_.value.splice(index, 1, cacheItem)
     }
+    const user = getUserInstance()
+    const userId = user.getUserId()
+    const token = user.getToken()
+    UserApi.addEpisodeProgress(userId, item.episodeId, item.progress, token)
   }
 
   /**
@@ -117,20 +134,31 @@ class PlayProgress extends StorageWatcherCling {
   }
 
   public saveStore() {
-    localStorage.setItem(
-      PLAY_PROGRESS_STORE_KEY,
-      JSON.stringify(this.cache_.value)
-    )
+    // localStorage.setItem(
+    //   PLAY_PROGRESS_STORE_KEY,
+    //   JSON.stringify(this.cache_.value)
+    // )
   }
 
-  public getStore() {
-    const data = jsonParse<CacheItem[]>(
-      localStorage.getItem(PLAY_PROGRESS_STORE_KEY),
-      []
-    )
+  public async getStore() {
+
+    // const data = jsonParse<CacheItem[]>(
+    //   localStorage.getItem(PLAY_PROGRESS_STORE_KEY),
+    //   []
+    // )
+    if (!this.checkUserLogin) return
+    const user = getUserInstance()
+    const userId = user.getUserId()
+    const token = user.getToken()
+    console.log('userid............'+userId)
+    const data = await UserApi.getEpisodeProgress(userId, token)
     if (data instanceof Array) {
       this.cache_.value = data
     }
+  }
+
+  public clearStore() {
+    this.cache_.value = []
   }
 
   /**
@@ -140,6 +168,15 @@ class PlayProgress extends StorageWatcherCling {
    */
   public getLatestCache(comicId: BaseCacheItem['comicId']): CacheItem | null {
     return this.latestCacheMap[comicId]
+  }
+
+  /**
+   * 根据源id,动漫id,集数获取cache
+   */
+  public getCacheByItem(comicId:BaseCacheItem['comicId'],
+   orgId: BaseCacheItem['orgId'],
+    name: BaseCacheItem['name']) {
+    return this.cacheMap[this.cacheItemToName({comicId:comicId, orgId:orgId, name:name,episodeId:0,  progress:0})];
   }
 }
 

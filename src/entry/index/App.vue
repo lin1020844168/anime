@@ -13,7 +13,7 @@
     <main class="app-contain__main">
       <AppRouter />
     </main>
-
+    <Login v-if="systemConfigStore.loginVisiable" />
     <Live2d
       ref="live2dComp"
       v-model:visible="koharu.visible"
@@ -25,7 +25,11 @@
 <script lang="ts">
 import '@/assets/icon/iconfont.css'
 import '@/assets/icon/iconfont.js'
-import { defineComponent, onMounted, ref } from 'vue'
+import '@/assets/iconfont/iconfont.js'
+import '@/assets/iconfont/iconfont.css'
+// import '@/assets/chat/font/iconfont.css'
+
+import { defineComponent, onMounted, ref, provide } from 'vue'
 
 import Live2d from '@/components/Live2d/Live2d.vue'
 import AppAsideBar from '@/layout/AppAsideBar.vue'
@@ -37,7 +41,9 @@ import { useIsDev } from '@/hooks/utils'
 import { useSystemConfigStore } from '@/stores/systemConfig.store'
 import { useKoharu } from '@/stores/koharu.store'
 import { AwDailog } from '@/components/AwDailog'
-
+import Login from '@/components/login/login.vue'
+import { useUserStore } from '@/stores/user.store'
+// import Chatroom from '@/components/chatroom/Chatroom.vue'
 function provideModule() {
   const { isDev } = useIsDev()
   return {
@@ -50,6 +56,12 @@ function asideModule() {
     asideVisible
   }
 }
+
+// function initUserModule() {
+//   const userStore = useUserStore()
+//   userStore.init()
+// }
+
 function live2dModule() {
   const live2dComp = ref<InstanceType<typeof Live2d>>()
   const koharu = useKoharu()
@@ -93,13 +105,15 @@ export default defineComponent({
     AppAsideBar,
     AppRouter,
     AppTabBar,
-    Live2d
-  },
+    Live2d,
+    Login,
+},
   setup() {
     const systemConfigStore = useSystemConfigStore()
     systemConfigStore.init()
     initModule()
     return {
+      systemConfigStore,
       WEB_NAME,
       ...asideModule(),
       ...provideModule(),

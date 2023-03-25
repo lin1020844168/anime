@@ -12,11 +12,30 @@
       />
       <Icon
         class="search-icon"
-        :name="modelValue !== '' ? 'delete1' : 'iconsearch'"
+        :name="modelValue !== '' ? 'delete1' : 'search'"
         @click="clearValue"
       />
 
       <div
+        v-if="state.using && props.items.length > 0"
+        :class="{ active: state.using && props.items.length > 0 }"
+        class="search-input__search"
+      >
+        <ul class="list ">
+          <li
+            v-for="(item, index) in items"
+            :key="index"
+            @click="changeHistory(item)"
+            v-html="item"
+          >
+      
+          </li>
+        </ul>
+    
+      </div>
+
+      <div
+        v-if="state.using && props.hots.length > 0"
         :class="{ active: state.using && props.hots.length > 0 }"
         class="search-input__history"
       >
@@ -33,6 +52,7 @@
       </div>
 
       <div
+        v-if="state.using && props.history.length > 0"
         :class="{ active: state.using && props.history.length > 0 }"
         class="search-input__history"
       >
@@ -60,6 +80,7 @@
 </template>
 
 <script lang="ts" setup>
+import { bottom } from '@popperjs/core';
 import { AwListModifyTransition } from 'sorarain'
 import { reactive, ref } from 'vue'
 
@@ -70,13 +91,15 @@ interface History {
 
 const props = withDefaults(
   defineProps<{
+    items?: string[],
     modelValue: string
     history?: History[]
     hots?: string[]
   }>(),
   {
     history: () => [],
-    hots: () => []
+    hots: () => [],
+    items: () => []
   }
 )
 
@@ -102,10 +125,29 @@ const updateValue = (e: Event) => {
   emit('update:modelValue', value)
 }
 const changeHistory = (v: string) => {
-  if (v === props.modelValue) return
-  emit('update:modelValue', v)
+  const formatV = deleteHtml(v) 
+  if (formatV === props.modelValue) return
+  emit('update:modelValue', formatV)
   emit('search')
   unUsing()
+}
+
+const deleteHtml= (v:string):string =>{
+  let flag = false;
+  let l = 0;
+  let ans = "";
+  for (let i=0; i<v.length; i++) {
+    if (!flag && v[i]=='<') {
+      flag = true;
+      ans += v.substring(l, i);
+    }
+    if (flag && v[i]=='>') {
+      l = i+1;
+      flag = false;
+    }
+    
+  }
+  return l>=v.length?ans:ans+v.substring(l, v.length)
 }
 const clearValue = () => {
   if (props.modelValue !== '') {
@@ -190,9 +232,9 @@ const clearValue = () => {
     }
   }
 
-  &__history {
-    position: absolute;
-    top: calc(100% + 20px);
+  &__search{
+    position: relative;
+    margin-top: 20px;
     width: 100%;
     box-sizing: border-box;
     background: var(--aside-bg-color);
@@ -203,7 +245,64 @@ const clearValue = () => {
     transition: all 0.25s;
     overflow: auto;
     &.active {
-      max-height: 220px;
+      // max-height: 220px;
+      max-height: 440px;
+      // padding: 20px;
+    }
+
+    .title {
+      color: var(--font-unactive-color);
+      font-weight: 700;
+      font-size: 14px;
+      padding-bottom: 16px;
+
+      i {
+        font-size: 14px;
+        padding-left: 2px;
+        cursor: pointer;
+        transition: all 0.25s;
+
+        &:hover {
+          opacity: 0.7;
+          color: var(--warning-color);
+        }
+      }
+    }
+    .list {
+      li {
+        position: relative;
+        padding: 0 16px;
+        height: 36px;
+        line-height: 36px;
+        border-radius: 4px;
+        
+        cursor: pointer;
+        transition: all 0.25s;
+
+        &:hover {
+          background: var(--bg-color);
+        }
+      }
+    }
+  }
+
+  &__history {
+    // position: absolute;
+    // top: calc(100% + 20px);
+    position: relative;
+    margin-top: 20px;
+    width: 100%;
+    box-sizing: border-box;
+    background: var(--aside-bg-color);
+    border-radius: @radius;
+    box-shadow: 0 0 14px rgba(0, 0, 0, 0.2);
+    user-select: none;
+    max-height: 0;
+    transition: all 0.25s;
+    overflow: auto;
+    &.active {
+      // max-height: 220px;
+      max-height: 440px;
       padding: 20px;
     }
 

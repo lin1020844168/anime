@@ -13,7 +13,7 @@ export const SEARCH_FILTER: {
   RELEASE_TIME: [
     {
       name: '全部',
-      value: 0
+      value: -1
     },
     ...Array(21)
       .fill(0)

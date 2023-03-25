@@ -22,7 +22,7 @@ export default defineConfig({
     // 生成环境，依赖抽离为cdn
     viteImportToCdn({
       modules: [
-        {
+        {  
           name: 'video.js',
           var: 'videojs',
           path: 'https://cdn.bootcdn.net/ajax/libs/video.js/7.21.0/video.min.js'
@@ -58,7 +58,7 @@ export default defineConfig({
         },
         javascriptEnabled: true
       }
-    },
+    }, 
     // 用于解决 warning: "@charset" must be the first rule in the file
     postcss: {
       plugins: [
@@ -92,9 +92,24 @@ export default defineConfig({
           }
         }
       }
-    }
+    } 
   },
+  // optimizeDeps: {
+  //   exclude: ["autopreview"],
+  // },
   server: {
-    port: 1007
+    hmr: true,
+    // watch: {
+    //   ignored: ["!**/node_modules/autopreview/**"],
+    // },
+    port: 11111,
+    // proxy: {
+    //   '/pixiv': {
+    //     target: 'http://pixivapi.adicw.cn', //目标url
+    //     changeOrigin: true, //支持跨域
+    //     rewrite: (path) => path.replace(/^\/pixiv/, ""), 
+    //       //重写路径,替换/api
+    //   }
+    // }
   }
 })

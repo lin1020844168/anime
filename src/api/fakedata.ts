@@ -6,7 +6,7 @@ export function fakeRequest<T>(data: T): Promise<{
       resolve({
         data: data
       })
-    }, 1000)
+    }, 0)
   })
 }
 
@@ -206,7 +206,7 @@ export const FAKE_Filter = {
   }
 }
 
-export const FAKE_GETANIME = {
+export const FAKE_getAnimeDetail = {
   code: 200,
   message: '\u8bf7\u6c42\u6210\u529f',
   data: {

@@ -1,6 +1,6 @@
 <template>
   <div v-lazy-backgroudImg="detail.cover" class="comic-card__info">
-    <header>{{ detail.title }}</header>
+    <header v-html="detail.title"></header>
     <footer>
       <p>{{ detail.season }}</p>
     </footer>

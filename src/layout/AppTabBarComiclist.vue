@@ -23,7 +23,7 @@
               <div class="card-info">
                 <p>{{ k.name }}</p>
                 <span v-if="k.playEpisode">{{
-                  `观看至 ${k.playEpisode} ${k.playProgress}`
+                  `观看至 [${k.playEpisode}] ${k.playProgress}`
                 }}</span>
                 <span v-else class="bad">播放失败</span>
               </div>

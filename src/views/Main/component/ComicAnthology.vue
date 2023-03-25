@@ -30,10 +30,10 @@
 
     <AwListModifyTransition tag="ul" class="comic-anthology__list">
       <li
-        v-for="{ name, value } in realList"
+        v-for="{ name, value, episodeId } in realList"
         :key="value"
         :class="{ active: active === value, disable: isBad(value) }"
-        @click="liClick({ name, value })"
+        @click="liClick({ name, value, episodeId })"
       >
         {{ name }}
       </li>
@@ -50,7 +50,8 @@ import { videoUrlFormat } from '@/api/utils'
 
 export interface Option {
   name: string
-  value: string
+  value: string 
+  episodeId: number|string
 }
 export type ChangeReturns = Option & {
   orgId: string

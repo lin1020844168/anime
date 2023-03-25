@@ -99,7 +99,7 @@ export default defineComponent({
           break
         }
         default: {
-          type = 'video/' + lastKey
+          type = 'application/x-mpegURL'
         }
       }
       return {

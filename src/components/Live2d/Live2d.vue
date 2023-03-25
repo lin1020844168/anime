@@ -8,15 +8,15 @@
 import { moveable } from '@sorarain/use'
 import { computed, CSSProperties, defineComponent, reactive, ref } from 'vue'
 import { LIVE2D_CDNS } from './static'
-
-/** 初始化参数 */
+      
+/** 初始化参数 */  
 export interface InitOption {
   /** 模型model.json路径，此文件建议放到public文件夹下 */
   model: string
   /** 缩放比例 */
   scale?: number
   /** 生成模型空间大小 */
-  size?: {
+  size?: { 
     width: number
     height: number
   }

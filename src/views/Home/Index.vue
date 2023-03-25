@@ -24,7 +24,7 @@
     <AdBreakTop target="#home" />
   </div>
 </template>
-
+ 
 <script lang="ts">
 import { defineComponent, ref, shallowReactive } from 'vue'
 
@@ -35,7 +35,7 @@ import HomeBlockComic from './component/HomeBlockComic.vue'
 
 import * as Api from '@apis/index'
 import { useComicUpdate } from '@/stores/comicUpdate.store'
-
+  
 export default defineComponent({
   name: 'Home',
   components: {
@@ -56,9 +56,9 @@ export default defineComponent({
       tv: [],
       endJp: [],
       cn: []
-    })
+    });
 
-    ;(async () => {
+    (async () => {
       const data = await Api.getHomeMixData()
       if (data) {
         comicUpdate.setComic(data.perweek)

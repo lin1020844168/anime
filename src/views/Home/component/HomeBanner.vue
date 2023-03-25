@@ -1,14 +1,8 @@
 <template>
   <div v-show="isInit" class="home-banner">
     <div class="home-banner__bg">
-      <el-carousel
-        height="100%"
-        indicator-position="none"
-        arrow="never"
-        :interval="6000"
-        :pause-on-hover="false"
-        @change="onCarouselChange"
-      >
+      <el-carousel height="100%" indicator-position="none" arrow="never" :interval="6000" :pause-on-hover="false"
+        @change="onCarouselChange">
         <el-carousel-item v-for="(item, index) in realBanner" :key="index">
           <BaseImg :src="item.cover" :lazy="false" />
         </el-carousel-item>
@@ -18,10 +12,7 @@
       <div v-if="isReady" class="home-banner__info">
         <div class="home-banner__info-msg">
           <template v-if="carousel.current">
-            <transition
-              enter-active-class="carousel-info-in"
-              leave-active-class="carousel-info-out"
-            >
+            <transition enter-active-class="carousel-info-in" leave-active-class="carousel-info-out">
               <div v-show="carousel.infoVisible" class="inner">
                 <span>{{ carousel.current.season || '-' }}</span>
                 <h1>{{ carousel.current.title }}</h1>
@@ -30,18 +21,13 @@
                   但即便烟花消逝了 回忆却还留着
                 </p>
                 <div class="inner-rate">
-                  <el-rate
-                    :model-value="Number(carousel.current.rank || 0) / 2"
-                  />
+                  <el-rate :model-value="Number(carousel.current.rank || 0) / 2" />
                   <span>{{ carousel.current.rank || 0 }} <i>评分</i></span>
                 </div>
                 <div class="inner-control">
-                  <el-button
-                    type="warning"
-                    round
-                    @click="toComicMain(carousel.current.id)"
-                    >前往播放<Icon name="play"
-                  /></el-button>
+                  <el-button type="warning" round @click="toComicMain(carousel.current.id)">前往播放
+                    <Icon name="play" />
+                  </el-button>
                   <el-button round plain>详情</el-button>
                 </div>
               </div>
@@ -50,21 +36,10 @@
         </div>
         <div class="home-banner__info-section">
           <AwTabs v-model:active="tabs.active" class="tabs">
-            <AwTab
-              v-for="tab in tabs.list"
-              :key="tab.key"
-              :name="tab.key"
-              :title="tab.name"
-            >
+            <AwTab v-for="tab in tabs.list" :key="tab.key" :name="tab.key" :title="tab.name">
               <AwSlideX @on-change="(index) => (tab.index = index)">
-                <AwSlideItem
-                  v-for="(item, index) in comicTabs[tab.key]"
-                  :key="index"
-                >
-                  <HomeSectionCard
-                    :detail="item"
-                    :active="index === tab.index"
-                  />
+                <AwSlideItem v-for="(item, index) in comicTabs[tab.key]" :key="index">
+                  <HomeSectionCard :detail="item" :active="index === tab.index" />
                 </AwSlideItem>
               </AwSlideX>
             </AwTab>
@@ -159,7 +134,7 @@ export default defineComponent({
           index: 0
         }
       ]
-    })
+    });
 
     const comicTabs = computed(() => {
       return {
@@ -177,11 +152,20 @@ export default defineComponent({
         }))
       }
     })
-    const realBanner = computed(() =>
-      props.banner.map((item) => ({
+    // props.banner.forEach((item)=>{
+    //     const id = item.id;
+    //     (async ()=>{ 
+    //       const data = await getComicMain(id)
+    //       if (data) bannerInfoMap.set(id, data)
+    //     })()
+    //   })
+    const realBanner = computed(() => {
+      return props.banner.map((item) => ({
         ...item,
         ...(bannerInfoMap.get(item.id) || {})
       }))
+    }
+
     )
 
     const onCarouselChange = async (e: number) => {
@@ -199,10 +183,11 @@ export default defineComponent({
         isReady.value = true
       }
     )
+
+    // 找不到评分时替换
     watch(
       () => props.banner,
       async (banner) => {
-        await wait(2000)
         banner.forEach(async ({ id }) => {
           if (bannerInfoMap.get(id)) return
           const data = await getComicMain(id)
@@ -230,19 +215,23 @@ export default defineComponent({
   width: 100%;
   aspect-ratio: 16/9;
   overflow: hidden;
+
   &.fake {
     display: flex;
     justify-content: center;
     align-items: center;
   }
+
   &__bg {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
+
     ::v-deep(.el-carousel) {
       height: 100%;
+
       img {
         width: 100%;
         height: 100%;
@@ -250,37 +239,41 @@ export default defineComponent({
       }
     }
   }
+
   &__info {
     position: relative;
     width: 100%;
     height: 100%;
     display: flex;
     flex-direction: column;
+
     &-msg {
       flex: 1;
-      background: linear-gradient(
-        to right,
-        rgba(0, 0, 0, 0.7),
-        rgba(0, 0, 0, 0)
-      );
+      background: linear-gradient(to right,
+          rgba(0, 0, 0, 0.7),
+          rgba(0, 0, 0, 0));
       display: flex;
       align-items: center;
       padding: 40px;
       box-sizing: border-box;
+
       span {
         font-size: 12px;
         color: rgb(255 255 255 /0.9);
       }
+
       h1 {
         padding-top: 6px;
         padding-bottom: 18px;
         color: #fff;
       }
+
       p {
         font-size: 14px;
         color: rgb(255 255 255 /0.7);
         max-width: 80%;
       }
+
       .inner-rate {
         display: flex;
         align-items: center;
@@ -289,38 +282,46 @@ export default defineComponent({
         font-size: 14px;
         color: rgb(255 255 255 /0.7);
       }
+
       .inner-control {
         ::v-deep(.el-button) {
           position: relative;
           padding: 6px 22px;
           min-height: 36px;
           margin-right: 10px;
+
           i {
             width: 8px;
             margin-left: 4px;
           }
+
           &:first-child {
             background: var(--primary-color);
             border-color: var(--primary-color);
           }
+
           &:last-child {
             background: unset;
             color: #fff;
           }
         }
       }
+
       .carousel-info {
         &-in {
           animation: slide 0.25s forwards;
         }
+
         &-out {
           animation: slide 0.25s forwards reverse;
         }
+
         @keyframes slide {
           from {
             opacity: 0;
             transform: translateY(20px);
           }
+
           to {
             opacity: 1;
             transform: translateY(0);
@@ -328,17 +329,20 @@ export default defineComponent({
         }
       }
     }
+
     &-section {
       position: relative;
       background: rgba(0, 0, 0, 0.96);
       padding: 40px;
       padding-top: 0;
       box-sizing: border-box;
+
       &::before {
         .mask(3);
         box-shadow: 0 -38px 32px rgb(0 0 0 / 92%);
         transform: scaleX(1.4);
       }
+
       .tabs {
         width: 100%;
         height: 100%;

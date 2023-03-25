@@ -1,5 +1,5 @@
 <template>
-  <img v-if="!loaded" ref="fakeImgEl" :src="BASE_IMG" alt="" />
+  <img v-if="!loaded" ref="fakeImgEl" :src="BASE_IMG" alt=""/>
   <img v-else :src="src" alt="" />
 </template>
 

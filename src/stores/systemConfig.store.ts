@@ -23,6 +23,7 @@ export function getStaticResource() {
 
 export const useSystemConfigStore = defineStore('SystemConfig', {
   state: () => ({
+    loginVisiable: false,
     serverIp: '',
     staticResource: {
       videoProgressCurIcon: ''

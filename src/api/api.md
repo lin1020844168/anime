@@ -130,7 +130,7 @@
 
 **Method：** GET
 
-**实例：** api/getAnime/1829
+**实例：** api/getAnimeDetail/1829
 
 **注意：** 返回参数里的`playlist`，其集信息`title`对应的`value`为当前集在集列表的索引下标（因为此接口和api/getVideo有关联）
 

@@ -3,7 +3,7 @@
     "target": "esnext",
     "module": "esnext",
     "strict": true,
-    "jsx": "preserve",
+    // "jsx": "preserve",
     "importHelpers": true,
     "moduleResolution": "node",
     // "sourceMap": true,
@@ -17,13 +17,13 @@
     "types": ["element-plus/global"],
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"],
     "paths": {
-      "@/*": ["./src/*"],
+      "@/*": ["./src/*"], 
       "styles/*": ["./src/assets/css/*"],
       "static/*": ["./src/assets/*"],
-      "@apis/*": ["./src/api/*"],
+      "@apis/*": ["./src/api/*"], 
       "@comps*": ["./src/components/*"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue", "src/utils/idutils.js", "src/utils/dateUtil.js"],
   "exclude": ["node_modules", "dist"]
 }

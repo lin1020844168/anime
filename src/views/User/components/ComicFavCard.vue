@@ -49,9 +49,9 @@ import { ComicFavItem } from '@/class/comicFav.class'
 import { toComicMain } from '@/router/jump'
 import { useFavStore } from '@/stores/fav.store'
 import { useComicUpdate } from '@/stores/comicUpdate.store'
-
-export default defineComponent({
-  name: 'ComicFavCard',
+                  
+export default defineComponent({         
+  name: 'ComicFavCard',    
   components: {
     AwDrag
   },

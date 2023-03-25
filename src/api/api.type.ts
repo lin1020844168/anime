@@ -1,3 +1,9 @@
+import { ComicFavItem } from "@/class/comicFav.class"
+import {CacheItem as HistoryCacheItem}  from '@/class/playHistory.class'
+import {CacheItem as ProgressCacheItem } from '@/class/playProgress.class'
+import { type } from "os"
+import * as FnReturns from './type'
+
 interface ApiFormat<T> {
   /** 状态码 */
   code: number
@@ -8,10 +14,10 @@ interface ApiFormat<T> {
 }
 
 export type Search = ApiFormat<{
-  /** 当前返回页数 */
-  pageindex: number
-  /** 总页数 */
-  pagetotal: number
+  /** 当前页大小 */
+  size: number
+  /** 总条数 */
+  total: number
   /** 动漫列表 */
   results: {
     /** 分类列表 */
@@ -32,9 +38,9 @@ export type Search = ApiFormat<{
 }>
 
 export type Filter = ApiFormat<{
-  /** 当前返回页数 */
-  total_page: number
-  /** 总页数 */
+  /** 当前页条数 */
+  size: number
+  /** 总条数 */
   total: number
   /** 动漫列表 */
   results: {
@@ -49,7 +55,7 @@ export type Filter = ApiFormat<{
   }[]
 }>
 
-export type GetAnime = ApiFormat<{
+export type getAnimeDetail = ApiFormat<{
   /** 声优名字列表 */
   actors: string[]
   /** 分类列表 */
@@ -62,7 +68,7 @@ export type GetAnime = ApiFormat<{
   lang: string
   /** 作者 */
   master: string
-  /** 播放列表 */
+    
   playlist: {
     /** 播放源id-集列表 */
     [prop: number]: {
@@ -84,7 +90,18 @@ export type GetAnime = ApiFormat<{
 
 export type GetVideo = ApiFormat<{
   /** 播放源id-地址列表 */
-  [prop: number]: string[]
+  // [prop: number]: string[]
+  getVideo: {
+    key: string
+    /** 源-播放地址列表 */
+    // value: string[]
+    playlist: {
+      //连接地址
+      link: string,
+      //标题
+      title: string
+    }[]
+  }[]
 }>
 
 export type GetConfig = ApiFormat<{
@@ -254,3 +271,76 @@ export interface VilipixIllust {
   /** tags */
   tags: string[]
 }
+
+/**
+ * ==================================================================================================================
+ */
+export type GetEpisodeOrg = ApiFormat<{
+  //信息
+  key: string,
+  //源路径
+  src: string,
+  //画质
+  qualities: {
+    //画质值
+    value: number,
+    //画质描述
+    desc: string,
+  }[],
+  //分集信息
+  episodes: {
+    //分集id
+    id: string,
+    //分集位置
+    title: string|number, 
+    //分集标题
+    longTitle: string
+  }[]
+}[]>;
+
+export type GetFav = ApiFormat<ComicFavItem[]>;
+
+export type AddFav = ApiFormat<boolean>
+
+export type DelFav = ApiFormat<boolean>
+
+export type AddHistory = ApiFormat<boolean>
+
+export type GetHistory = ApiFormat<HistoryCacheItem[]>
+
+export type DelHistory = ApiFormat<boolean>
+
+export type ClearHistory = ApiFormat<boolean>
+
+export type AddEpisodeProgress = ApiFormat<boolean>
+
+export type GetEpisodeProgress = ApiFormat<ProgressCacheItem[]>
+
+export interface Category {
+  //分类名
+  name: string, 
+  //分类值
+  value: string, 
+  //子分类
+  children: Category[]
+}
+
+export type GetCategoryConfig = ApiFormat<Category[]>
+
+export type GetComplement = ApiFormat<string[]>
+
+export type Token = ApiFormat<FnReturns.UserInfo>
+
+export type UserInfo = ApiFormat<FnReturns.UserInfo>
+
+export type FriendInfo = ApiFormat<FnReturns.FriendInfo>
+
+export type FriendList = ApiFormat<FnReturns.FriendList>
+
+export type Void = ApiFormat<void>
+
+export type Code = ApiFormat<string>
+
+/**
+ * ==================================================================================================================
+ */

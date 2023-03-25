@@ -10,6 +10,12 @@ export const useFavStore = defineStore('favStore', {
     }
   },
   actions: {
+    async getStore() {
+      await getComicFavInstance().getStore()
+    },
+    clearStore() {
+      getComicFavInstance().clearStore()
+    },
     comicFav(comic: Comic) {
       getComicFavInstance().favHandler(comic)
     },
