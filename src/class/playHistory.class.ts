@@ -79,7 +79,6 @@ class PlayHistory extends StorageWatcherCling {
    */
   public clearStore() {
     this.cache_.value.splice(0)
-    localStorage.removeItem(PLAY_HISTORY_STORE_KEY)
   }
 }
 
